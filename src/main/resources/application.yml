@@ -1,0 +1,22 @@
+server:
+  port: 8080
+spring:
+  redis:
+    port: 6379
+    host: localhost
+  application:
+    name: reggie_take_out
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:8889/reggie
+      username: root
+      password: 1234567890
+mybatis-plus:
+  configuration:
+    #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: ID_WORKER
