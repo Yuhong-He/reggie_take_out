@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 @Slf4j
 @RestController
@@ -58,5 +62,20 @@ public class EmployeeController {
     public R<String> logout(HttpServletRequest request) {
         request.getSession().removeAttribute("employee");
         return R.success("Logout success");
+    }
+
+    @PostMapping
+    public R<String> save(HttpServletRequest request, @RequestBody Employee employee){
+        employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
+        Date in = new Date();
+        LocalDateTime ldt = LocalDateTime.ofInstant(in.toInstant(), ZoneId.systemDefault());
+        Date out = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
+        employee.setCreateTime(out);
+        employee.setUpdateTime(out);
+        long emp = (long) request.getSession().getAttribute("employee");
+        employee.setCreateUser(emp);
+        employee.setUpdateUser(emp);
+        employeeService.save(employee);
+        return R.success("Add new employee success");
     }
 }
