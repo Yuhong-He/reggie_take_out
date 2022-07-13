@@ -98,4 +98,14 @@ public class EmployeeController {
         employeeService.updateById(employee);
         return R.success("User update success");
     }
+
+    @GetMapping("/{id}")
+    public R<Employee> getById(@PathVariable Long id){
+        Employee employee = employeeService.getById(id);
+        if(employee != null){
+            return R.success(employee);
+        } else {
+            return R.error("Employee not exist");
+        }
+    }
 }
