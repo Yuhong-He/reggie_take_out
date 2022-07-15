@@ -64,14 +64,6 @@ public class EmployeeController {
     @PostMapping
     public R<String> save(HttpServletRequest request, @RequestBody Employee employee){
         employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
-        Date in = new Date();
-        LocalDateTime ldt = LocalDateTime.ofInstant(in.toInstant(), ZoneId.systemDefault());
-        Date out = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
-        employee.setCreateTime(out);
-        employee.setUpdateTime(out);
-        long emp = (long) request.getSession().getAttribute("employee");
-        employee.setCreateUser(emp);
-        employee.setUpdateUser(emp);
         employeeService.save(employee);
         return R.success("Add new employee success");
     }
@@ -89,12 +81,6 @@ public class EmployeeController {
 
     @PutMapping
     public R<String> update(HttpServletRequest request, @RequestBody Employee employee) {
-        Date in = new Date();
-        LocalDateTime ldt = LocalDateTime.ofInstant(in.toInstant(), ZoneId.systemDefault());
-        Date out = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
-        employee.setUpdateTime(out);
-        long emp = (long) request.getSession().getAttribute("employee");
-        employee.setUpdateUser(emp);
         employeeService.updateById(employee);
         return R.success("User update success");
     }
