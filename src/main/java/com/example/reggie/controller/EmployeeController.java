@@ -11,9 +11,6 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 
 @Slf4j
 @RestController
@@ -62,7 +59,7 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public R<String> save(HttpServletRequest request, @RequestBody Employee employee){
+    public R<String> save(@RequestBody Employee employee){
         employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
         employeeService.save(employee);
         return R.success("Add new employee success");
@@ -80,7 +77,7 @@ public class EmployeeController {
     }
 
     @PutMapping
-    public R<String> update(HttpServletRequest request, @RequestBody Employee employee) {
+    public R<String> update(@RequestBody Employee employee) {
         employeeService.updateById(employee);
         return R.success("User update success");
     }
