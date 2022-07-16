@@ -40,7 +40,7 @@ public class CategoryController {
 
     @DeleteMapping
     public R<String> delete(long ids){
-        categoryService.removeById(ids);
+        categoryService.remove(ids);
         return R.success("Delete success");
     }
 }
