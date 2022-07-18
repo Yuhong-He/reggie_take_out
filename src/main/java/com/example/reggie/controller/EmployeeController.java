@@ -66,9 +66,9 @@ public class EmployeeController {
     }
 
     @GetMapping("/page")
-    public R<Page> page(int page, int pageSize, String name) {
+    public R<Page<Employee>> page(int page, int pageSize, String name) {
         log.info("page = {}, pageSize = {}, name = {}", page, pageSize, name);
-        Page pageInfo = new Page<>(page, pageSize);
+        Page<Employee> pageInfo = new Page<>(page, pageSize);
         LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.like(!(name == null), Employee::getName, name);
         queryWrapper.orderByDesc(Employee::getUpdateTime);
