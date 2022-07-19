@@ -7,7 +7,6 @@ import com.example.reggie.dto.DishDto;
 import com.example.reggie.entity.Category;
 import com.example.reggie.entity.Dish;
 import com.example.reggie.service.CategoryService;
-import com.example.reggie.service.DishFlavorService;
 import com.example.reggie.service.DishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -25,9 +24,6 @@ public class DishController {
     private DishService dishService;
 
     @Autowired
-    private DishFlavorService dishFlavorService;
-
-    @Autowired
     private CategoryService categoryService;
 
     @PostMapping
@@ -42,7 +38,7 @@ public class DishController {
         Page<DishDto> dishDtoPage = new Page<>();
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.like(name != null, Dish::getName, name);
-        queryWrapper.orderByAsc(Dish::getUpdateTime);
+        queryWrapper.orderByDesc(Dish::getUpdateTime);
         dishService.page(pageInfo, queryWrapper);
 
         BeanUtils.copyProperties(pageInfo, dishDtoPage, "records");
@@ -60,5 +56,55 @@ public class DishController {
         }).collect(Collectors.toList());
         dishDtoPage.setRecords(list);
         return R.success(dishDtoPage);
+    }
+
+    @GetMapping("/{id}")
+    public R<DishDto> getById(@PathVariable Long id) {
+        DishDto dishDto = dishService.getByIdWithFlavor(id);
+        if(dishDto != null){
+            return R.success(dishDto);
+        } else {
+            return R.error("Dish not exist");
+        }
+    }
+
+    @PutMapping
+    public R<String> update(@RequestBody DishDto dishDto) {
+        dishService.updateWithFlavor(dishDto);
+        return R.success("Add success");
+    }
+
+    @PostMapping("/status/0")
+    public R<String> closeDish(String ids) {
+        if(ids.contains(",")){
+            String[] temp = ids.split(",");
+            for(String id : temp){
+                Dish dish = dishService.getById(Long.valueOf(id));
+                dish.setStatus(0);
+                dishService.updateById(dish);
+            }
+        } else {
+            Dish dish = dishService.getById(ids);
+            dish.setStatus(0);
+            dishService.updateById(dish);
+        }
+        return R.success("Update success");
+    }
+
+    @PostMapping("/status/1")
+    public R<String> sellDish(String ids) {
+        if(ids.contains(",")){
+            String[] temp = ids.split(",");
+            for(String id : temp){
+                Dish dish = dishService.getById(Long.valueOf(id));
+                dish.setStatus(1);
+                dishService.updateById(dish);
+            }
+        } else {
+            Dish dish = dishService.getById(ids);
+            dish.setStatus(1);
+            dishService.updateById(dish);
+        }
+        return R.success("Update success");
     }
 }
