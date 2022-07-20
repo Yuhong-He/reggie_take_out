@@ -50,16 +50,19 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
     @Override
     public void updateWithFlavor(DishDto dishDto) {
-        String imageName = basePath + this.getById(dishDto).getImage();
-        this.updateById(dishDto);
-        File image = new File(imageName);
-        if(image.delete()){
-            LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(DishFlavor::getDishId, dishDto.getId());
-            dishFlavorService.remove(queryWrapper);
-            List<DishFlavor> flavors = dishDto.getFlavors();
-            flavors = flavors.stream().peek((item) -> item.setDishId(dishDto.getId())).collect(Collectors.toList());
-            dishFlavorService.saveBatch(flavors);
+        String oldImage = this.getById(dishDto).getImage();
+        String newImage = dishDto.getImage();
+        if(!oldImage.equals(newImage)){
+            String imageName = basePath + oldImage;
+            this.updateById(dishDto);
+            File image = new File(imageName);
+            image.delete();
         }
+        LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DishFlavor::getDishId, dishDto.getId());
+        dishFlavorService.remove(queryWrapper);
+        List<DishFlavor> flavors = dishDto.getFlavors();
+        flavors = flavors.stream().peek((item) -> item.setDishId(dishDto.getId())).collect(Collectors.toList());
+        dishFlavorService.saveBatch(flavors);
     }
 }

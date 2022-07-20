@@ -6,13 +6,17 @@ import com.example.reggie.common.R;
 import com.example.reggie.dto.DishDto;
 import com.example.reggie.entity.Category;
 import com.example.reggie.entity.Dish;
+import com.example.reggie.entity.DishFlavor;
 import com.example.reggie.service.CategoryService;
+import com.example.reggie.service.DishFlavorService;
 import com.example.reggie.service.DishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,7 +28,13 @@ public class DishController {
     private DishService dishService;
 
     @Autowired
+    private DishFlavorService dishFlavorService;
+
+    @Autowired
     private CategoryService categoryService;
+
+    @Value("${reggie.path}")
+    private String basePath;
 
     @PostMapping
     public R<String> save(@RequestBody DishDto dishDto) {
@@ -75,7 +85,7 @@ public class DishController {
     }
 
     @PostMapping("/status/0")
-    public R<String> closeDish(String ids) {
+    public R<Boolean> closeDish(String ids) {
         if(ids.contains(",")){
             String[] temp = ids.split(",");
             for(String id : temp){
@@ -88,11 +98,11 @@ public class DishController {
             dish.setStatus(0);
             dishService.updateById(dish);
         }
-        return R.success("Update success");
+        return R.success(true);
     }
 
     @PostMapping("/status/1")
-    public R<String> sellDish(String ids) {
+    public R<Boolean> sellDish(String ids) {
         if(ids.contains(",")){
             String[] temp = ids.split(",");
             for(String id : temp){
@@ -105,6 +115,30 @@ public class DishController {
             dish.setStatus(1);
             dishService.updateById(dish);
         }
-        return R.success("Update success");
+        return R.success(true);
+    }
+
+    @DeleteMapping
+    public R<Boolean> delete(String ids) {
+        if(ids.contains(",")){
+            String[] temp = ids.split(",");
+            for(String id : temp){
+                deleteOneDish(id);
+            }
+        } else {
+            deleteOneDish(ids);
+        }
+        return R.success(true);
+    }
+
+    private void deleteOneDish(String id) {
+        String imageName = basePath + dishService.getById(id).getImage();
+        File image = new File(imageName);
+        if(image.delete()){
+            dishService.removeById(id);
+            LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(DishFlavor::getDishId, id);
+            dishFlavorService.remove(queryWrapper);
+        }
     }
 }
